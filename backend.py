@@ -1,4 +1,6 @@
 # сюда нужно импортировать классы бд
+from loader import db_of_users
+
 
 class UserInterface:
     def __init__(self, login, password):
@@ -50,7 +52,7 @@ class UserInterface:
         return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
 
     def get_public_desks(self):
-        # список публичных досок досок в формате (desk_id, desk_name, public)
+        # список публичных досок досок в формате (desk_id, desk_name, public, owner)
         return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
 
     def can_edit_desk(self, desk_id):
@@ -154,6 +156,8 @@ class UserInterface:
 
     def get_all_user(self):
         # список всех пользователе (user_id, login)
+        users = db_of_users.get_all_users()
+        # return users
         return [(1, 'Bob'), (3, 'Sera')]
 
     def get_all_user_with_edit_rights(self, desk_id):
