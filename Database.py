@@ -36,7 +36,7 @@ class UsersDB:
         self.login = connection.login
         self.password = connection.password
         self.connection = connection
-        self.create_table_of_users()
+        self.create_desk()
         if not self.try_log_in(connection, self.login, self.password):
             print('Пользователя с такими данными не существует! Неверный логин или пароль!')
             return None
@@ -44,7 +44,7 @@ class UsersDB:
 
 
 
-    def create_table_of_users(self):
+    def create_desk(self):
         sql = '''
         create table IF NOT EXISTS `users` (
           `user_id` INTEGER PRIMARY KEY AUTOINCREMENT not null,
@@ -143,6 +143,7 @@ class DesksDB:
         sql_insert = "INSERT INTO desks (desk_name, public, owner_login) VALUES (?, ?, ?)"
         self.connection.execute(sql_insert, (desk_name, desk_type, self.login), commit=True)
         print("Доска успешно создана!")
+        return True
 
     def create_columns_table(self):
         sql = '''

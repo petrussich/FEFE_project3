@@ -13,26 +13,38 @@ class UserInterface:
     def is_login_exist(login):
         connection_users = connect
         users = db_of_users.is_login_exist(connection_users, login)
+        if users:
+            return True
+        else:
+            return False
         # проверяет существует ли пользователь с указанным логином
         # True - существует
         # False - нет существует
-        return True
+
 
     @staticmethod
     def try_log_in(login, password):
         connection_users = connect
         users = db_of_users.try_log_in(connection_users, login, password)
+        if users:
+            return True
+        else:
+            return False
         # проверяет cуществует ли пользователь с логин/пароль
         # True - существует
         # False - нет существует (Неверен логин/пароль)
-        return True
+        # return True
 
     @staticmethod
     def add_new_user(login, password):
         connection_users = connect
         users = db_of_users.add_new_user(connection_users, login, password)
+        if users:
+            return True
+        else:
+            return False
         # добавляем в бд нового пользователя
-        return True
+        # return True
 
     @staticmethod
     def get_user_login_by_id(id):
@@ -48,8 +60,8 @@ class UserInterface:
         # возвращает id пользователя по логину (логин уникален для каждого пользователя)
         # return 1
 
-    def create_table_of_users(self, desk_name, desk_type):
-        users = db_of_users.create_table_of_users()
+    def create_desk(self, desk_name, desk_type):
+        users = db_of_desks.create_desk(desk_name, desk_type)
         # создаём доску в бд
         # владелец доски self.login
         # True - доска успешно создана
@@ -70,7 +82,10 @@ class UserInterface:
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
         users = db_of_desks.can_edit_desk(desk_id)
-        return True
+        if users:
+            return True
+        else:
+            return False
 
     @staticmethod
     def get_desk_name_by_desk_id(desk_id):
