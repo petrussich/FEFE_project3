@@ -51,12 +51,14 @@ class UserInterface:
         # возвращает логин пользователя по id
         connection_users = connect
         users = db_of_users.get_user_login_by_id(connection_users, id)
+        return users
         # return 'login'
 
     @staticmethod
     def get_user_id_by_login(login):
         connection_users = connect
         users = db_of_users.get_user_id_by_login(connection_users, login)
+        return users
         # возвращает id пользователя по логину (логин уникален для каждого пользователя)
         # return 1
 
@@ -71,11 +73,13 @@ class UserInterface:
     def get_owned_desks(self):
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
         users = db_of_desks.get_owned_desks()
+        return users
         # return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
 
     def get_public_desks(self):
         # список публичных досок досок в формате (desk_id, desk_name, public, owner)
         users = db_of_desks.get_public_desks()
+        return users
         # return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
 
     def can_edit_desk(self, desk_id):
@@ -92,6 +96,7 @@ class UserInterface:
         # desk_name - не уникален
         connection_users = connect
         users = db_of_desks.get_desk_name_by_desk_id(connection_users, desk_id)
+        return users
         # return 'desk_name'
 
     @staticmethod
