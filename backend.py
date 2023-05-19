@@ -16,6 +16,7 @@ class UserInterface:
         # проверяет существует ли пользователь с указанным логином
         # True - существует
         # False - нет существует
+        return True
 
     @staticmethod
     def try_log_in(login, password):
@@ -24,14 +25,14 @@ class UserInterface:
         # проверяет cуществует ли пользователь с логин/пароль
         # True - существует
         # False - нет существует (Неверен логин/пароль)
-        # return True
+        return True
 
     @staticmethod
     def add_new_user(login, password):
         connection_users = connect
         users = db_of_users.add_new_user(connection_users, login, password)
         # добавляем в бд нового пользователя
-        # return True
+        return True
 
     @staticmethod
     def get_user_login_by_id(id):
@@ -53,7 +54,7 @@ class UserInterface:
         # владелец доски self.login
         # True - доска успешно создана
         # False - доска с таким именем уже существует
-        # return True
+        return True
 
     def get_owned_desks(self):
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
@@ -69,7 +70,7 @@ class UserInterface:
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
         users = db_of_desks.can_edit_desk(desk_id)
-        # return True
+        return True
 
     @staticmethod
     def get_desk_name_by_desk_id(desk_id):
@@ -89,7 +90,7 @@ class UserInterface:
         # True - успешно
         # False - доска с таким именем уже существует
         users = db_of_desks.change_desk_name(desk_id, new_desk_name)
-        # return True
+        return True
 
     def change_column_name(self, column_id, new_column_name):
         # изменяем имя column в бд
