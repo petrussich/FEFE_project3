@@ -1,5 +1,6 @@
-from Database import UsersDB
+from Database import UsersDB, DesksDB, DataBaseConnection
 
-db_of_users = UsersDB()
-
+connect = DataBaseConnection("Roma", "Slepchenko")
+db_of_users = UsersDB(connect)
+db_of_desks = DesksDB(connect)
 
