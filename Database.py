@@ -52,6 +52,7 @@ class UsersDB:
           `password` varchar(255) not null
         )'''
         self.connection.execute(sql, commit=True)
+        return True
 
 
     @staticmethod
@@ -190,8 +191,8 @@ class DesksDB:
     @staticmethod
      # TODO: Дописать функцию, она свзяана с функцией add_column_to_desk из твоей части
     def get_column_name_by_column_id(column_id):
-        # column_name - не уникален
 
+        # column_name - не уникален
         return 'column_name'
 
 
