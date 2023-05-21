@@ -1,5 +1,5 @@
 # сюда нужно импортировать классы бд
-from loader import db_of_users
+from loader import connect, db_of_users, db_of_desks
 
 
 class UserInterface:
@@ -11,36 +11,59 @@ class UserInterface:
 
     @staticmethod
     def is_login_exist(login):
+        connection_users = connect
+        users = db_of_users.is_login_exist(connection_users, login)
+        if users:
+            return True
+        else:
+            return False
         # проверяет существует ли пользователь с указанным логином
         # True - существует
         # False - нет существует
-        return True
+
 
     @staticmethod
     def try_log_in(login, password):
+        connection_users = connect
+        users = db_of_users.try_log_in(connection_users, login, password)
+        if users:
+            return True
+        else:
+            return False
         # проверяет cуществует ли пользователь с логин/пароль
         # True - существует
         # False - нет существует (Неверен логин/пароль)
-        return True
+        # return True
 
     @staticmethod
     def add_new_user(login, password):
-        if UserInterface.is_login_exist(login):
-            raise Exception('Пользователя с таким логином уже существует!')
+        connection_users = connect
+        users = db_of_users.add_new_user(connection_users, login, password)
+        if users:
+            return True
+        else:
+            return False
         # добавляем в бд нового пользователя
-        return True
+        # return True
 
     @staticmethod
     def get_user_login_by_id(id):
         # возвращает логин пользователя по id
-        return 'login'
+        connection_users = connect
+        users = db_of_users.get_user_login_by_id(connection_users, id)
+        return users
+        # return 'login'
 
     @staticmethod
     def get_user_id_by_login(login):
+        connection_users = connect
+        users = db_of_users.get_user_id_by_login(connection_users, login)
+        return users
         # возвращает id пользователя по логину (логин уникален для каждого пользователя)
-        return 1
+        # return 1
 
     def create_desk(self, desk_name, desk_type):
+        users = db_of_desks.create_desk(desk_name, desk_type)
         # создаём доску в бд
         # владелец доски self.login
         # True - доска успешно создана
@@ -49,23 +72,35 @@ class UserInterface:
 
     def get_owned_desks(self):
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
-        return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
+        users = db_of_desks.get_owned_desks()
+        return users
+        # return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
 
     def get_public_desks(self):
         # список публичных досок досок в формате (desk_id, desk_name, public, owner)
-        return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
+        users = db_of_desks.get_public_desks()
+        return users
+        # return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
 
     def can_edit_desk(self, desk_id):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
-        return True
+        users = db_of_desks.can_edit_desk(desk_id)
+        if users:
+            return True
+        else:
+            return False
 
     @staticmethod
     def get_desk_name_by_desk_id(desk_id):
         # desk_name - не уникален
-        return 'desk_name'
+        connection_users = connect
+        users = db_of_desks.get_desk_name_by_desk_id(connection_users, desk_id)
+        return users
+        # return 'desk_name'
 
     @staticmethod
+    # TODO: дописать функцию
     def get_column_name_by_column_id(column_id):
         # column_name - не уникален
         return 'column_name'
@@ -74,6 +109,7 @@ class UserInterface:
         # изменяем имя доски в бд
         # True - успешно
         # False - доска с таким именем уже существует
+        users = db_of_desks.change_desk_name(desk_id, new_desk_name)
         return True
 
     def change_column_name(self, column_id, new_column_name):
@@ -158,10 +194,12 @@ class UserInterface:
         # список всех пользователе (user_id, login)
         users = db_of_users.get_all_users()
         # return users
-        return [(1, 'Bob'), (3, 'Sera')]
+        # return [(1, 'Bob'), (3, 'Sera')]
 
     def get_all_user_with_edit_rights(self, desk_id):
         # список всех пользователе (user_id, login, can_edit_desk)
         # can_edit_desk - может ли пользователь редактировать доску с desk_id
         # (актуально только для общественных досок)
         return [(1, 'Bob', 0), (3, 'Sera', 1), (33, 'Pol', 1)]
+
+#
