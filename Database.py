@@ -2,9 +2,14 @@ import sqlite3
 import data.config
 
 class DataBaseConnection:
-    def __init__(self, login, password, path_to_db=data.config.path_to_database):
-        self.login = login
-        self.password = password
+    # def __init__(self, login, password, path_to_db=data.config.path_to_database):
+    #     self.login = login
+    #     self.password = password
+    #     self.path_to_db = path_to_db
+
+    def __init__(self, path_to_db=data.config.path_to_database):
+        # self.login = login
+        # self.password = password
         self.path_to_db = path_to_db
 
     @property
@@ -33,13 +38,13 @@ class DataBaseConnection:
 
 class UsersDB:
     def __init__(self, connection: DataBaseConnection):
-        self.login = connection.login
-        self.password = connection.password
+        # self.login = connection.login
+        # self.password = connection.password
         self.connection = connection
         self.create_desk()
-        if not self.try_log_in(connection, self.login, self.password):
-            print('Пользователя с такими данными не существует! Неверный логин или пароль!')
-            return None
+        # if not self.try_log_in(connection, self.login, self.password):
+        #     print('Пользователя с такими данными не существует! Неверный логин или пароль!')
+        #     return None
             # raise Exception('Пользователя с такими данными не существует! Неверный логин или пароль!')
 
 
@@ -74,7 +79,7 @@ class UsersDB:
         # проверяет cуществует ли пользователь с логин/пароль
         sql = "SELECT * FROM users WHERE login=? AND password=?"
         result = connection.execute(sql, (login, password), fetchone=True)
-
+        print(result)
         if result is not None:
             # print("Пользователь с таким логином и паролем существует")
             return True  # существует
@@ -119,11 +124,11 @@ class UsersDB:
 
 class DesksDB:
     def __init__(self, connection: DataBaseConnection):
-        self.login = connection.login
-        self.password = connection.password
+        # self.login = connection.login
+        # self.password = connection.password
         self.connection = connection
         self.create_desk_table()
-        # self.create_desk_table("first desk", 1)
+
 
     def create_desk_table(self):
         sql = '''
@@ -139,9 +144,9 @@ class DesksDB:
         # False - доска с таким именем уже существует
         # return True - доска успешно создана
 
-    def create_desk(self, desk_name, desk_type):
+    def create_desk(self, desk_name, owner_login, desk_type=True):
         sql_insert = "INSERT INTO desks (desk_name, public, owner_login) VALUES (?, ?, ?)"
-        self.connection.execute(sql_insert, (desk_name, desk_type, self.login), commit=True)
+        self.connection.execute(sql_insert, (desk_name, desk_type, owner_login), commit=True)
         print("Доска успешно создана!")
         return True
 
@@ -155,9 +160,9 @@ class DesksDB:
         self.connection.execute(sql, commit=True)
         # print("Таблица колонок успешно создана!")
 
-    def get_owned_desks(self):
+    def get_owned_desks(self, owner_login):
         sql = "SELECT desk_id, desk_name, public, owner_login FROM desks WHERE owner_login=?"
-        result = self.connection.execute(sql, (self.login,), fetchall=True)
+        result = self.connection.execute(sql, (owner_login,), fetchall=True)
         return result
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
 
@@ -169,13 +174,13 @@ class DesksDB:
         # список публичных досок досок в формате (desk_id, desk_name, public, owner_login)
 
 
-    def can_edit_desk(self, desk_id):
+    def can_edit_desk(self, desk_id, owner_login):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
         sql = "SELECT owner_login FROM desks WHERE desk_id=?"
         result = self.connection.execute(sql, (desk_id,), fetchone=True)
         # TODO: Доделать проверку на наличие прав редактирования из таблицы "права на редактирования"
-        if result is not None and result[0] == self.login:
+        if result is not None and result[0] == owner_login:
             return True
         else:
             return False
@@ -206,19 +211,14 @@ class DesksDB:
         print(f"Имя доски изменено на {new_desk_name}!")
         return True
 
-# if __name__ == '__main__':
-#     conn1 = DataBaseConnection("Roma", "Slepchenko")
-#     user1 = UsersDB(conn1)
-#
-#     user1.add_new_user(conn1, "Roma", "Slepchenko")
-#     user1.add_new_user(conn1, "Sergey", "Pristup")
-#     user1.add_new_user(conn1, "Misha", "Elkin")
-#     user1.add_new_user(conn1, "Stepan", "Kotelnikov")
-#     UsersDB.add_new_user(conn1, "Gleb", "Kim")
-#
-#     desk1 = DesksDB(conn1)
-#     desk1.create_desk("first desk", 1)
-#     desk1.create_desk("second_desk", 0)
-#     desk1.create_desk("third_desk", 1)
-#     desk1.create_columns_table()
-#     desk1.change_desk_name(1, "new_name")
+if __name__ == '__main__':
+    conn1 = DataBaseConnection()
+    user1 = UsersDB(conn1)
+    desk1 = DesksDB(conn1)
+    # user1.add_new_user(conn1, "Sergey", "Pristup")
+    # user1.add_new_user(conn1, "Misha", "Elkin")
+    # user1.add_new_user(conn1, "Gleb", "Kim")
+    # desk1.create_desk("Sergey desk", "Sergey", 1)
+    # desk1.create_desk("Sergey desk2", "Sergey", 1)
+    # desk1.create_desk("Misha desk3", "Misha", 1)
+    print(desk1.get_owned_desks("Misha"))
