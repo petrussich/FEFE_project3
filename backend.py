@@ -72,6 +72,7 @@ class UserInterface:
 
     def get_owned_desks(self):
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
+        print(f'Получаем список досок для {self.login}')
         users = db_of_desks.get_owned_desks()
         return users
         # return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
@@ -202,3 +203,4 @@ class UserInterface:
         # (актуально только для общественных досок)
         return [(1, 'Bob', 0), (3, 'Sera', 1), (33, 'Pol', 1)]
 
+#

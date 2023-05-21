@@ -153,7 +153,7 @@ class DesksDB:
             `column_name` varchar(255) not null
         )'''
         self.connection.execute(sql, commit=True)
-        print("Таблица колонок успешно создана!")
+        # print("Таблица колонок успешно создана!")
 
     def get_owned_desks(self):
         sql = "SELECT desk_id, desk_name, public, owner_login FROM desks WHERE owner_login=?"
