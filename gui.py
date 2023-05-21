@@ -30,7 +30,8 @@ def Login(window):
     login=''
     password=''
     def try_to_login(login,password):
-        if UserInterface.try_log_in(login, password):
+        print(f'Вход: {login}:{password}')
+        if UserInterface.try_log_in(login, password): # Error login = '' password = ''
             user_interface = UserInterface(login, password)
             Menu(window, user_interface)
         else:
@@ -82,14 +83,15 @@ def SignUp(window):
     password2 = StringVar()
 
     def try_to_signup(login, password, password2):
-        if not (UserInterface.is_login_exist(login)) and (password.get() == password2.get()):
+        # print(f'Регистрация: {login.get()}:{password.get()}:{password2.get()}')
+        if not (UserInterface.is_login_exist(login.get())) and (password.get() == password2.get()):
             UserInterface.add_new_user(login.get(), password.get())
             user_interface = UserInterface(login.get(), password.get())
             Menu(window, user_interface)
         elif password.get() != password2.get():
             messagebox.showerror('Ошибка', 'Пароли не совпадают')
             SignUp(window)
-        elif UserInterface.is_login_exist(login):
+        elif UserInterface.is_login_exist(login.get()):
             messagebox.showerror('Ошибка', 'Пользователь с таким логином уже существует')
             SignUp(window)
 
@@ -688,10 +690,10 @@ def Card(window, user_interface, card, desk):
     text.place(relx=0.5, rely=0.5, anchor="center")
     author.place(relx=0.5, rely=0.95, anchor="center")
 
-login=''
-password=''
-user_interface = UserInterface(login, password)
-desk = (0, 'Доска 1', 0, 'Myself')
+# login=''
+# password=''
+# user_interface = UserInterface(login, password)
+# desk = (0, 'Доска 1', 0, 'Myself')
 window = Tk()
 window.geometry("450x550")
 window.title("TaskManager")
