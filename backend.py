@@ -67,12 +67,14 @@ class UserInterface:
         # создаём доску в бд
         # владелец доски self.login
         # True - доска успешно создана
-        # False - доска с таким именем уже существует
+        print(f'Создана доска: {desk_name}:{desk_type}')
         return True
 
     def get_owned_desks(self):
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
+        print(f'Получаем список досок для {self.login}')
         users = db_of_desks.get_owned_desks()
+        print(f'Доски для {self.login}: {users}')
         return users
         # return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
 
@@ -192,9 +194,9 @@ class UserInterface:
 
     def get_all_user(self):
         # список всех пользователе (user_id, login)
-        users = db_of_users.get_all_users()
+        # users = db_of_users.get_all_users()
         # return users
-        # return [(1, 'Bob'), (3, 'Sera')]
+        return [(1, 'Bob'), (3, 'Sera')]
 
     def get_all_user_with_edit_rights(self, desk_id):
         # список всех пользователе (user_id, login, can_edit_desk)
@@ -202,4 +204,10 @@ class UserInterface:
         # (актуально только для общественных досок)
         return [(1, 'Bob', 0), (3, 'Sera', 1), (33, 'Pol', 1)]
 
-#
+
+if __name__ == '__main__':
+    UserInterface.add_new_user('rere', '113')
+    r = UserInterface.try_log_in('rere', 113)
+
+    print(r)
+
