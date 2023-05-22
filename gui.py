@@ -27,12 +27,11 @@ def Start(window):
     button_register.place(relx=0.5, rely=0.7, anchor="center")
 
 def Login(window):
-    login=''
-    password=''
+    login=StringVar()
+    password=StringVar()
     def try_to_login(login,password):
-        print(f'Вход: {login}:{password}')
-        if UserInterface.try_log_in(login, password): # Error login = '' password = ''
-            user_interface = UserInterface(login, password)
+        if UserInterface.try_log_in(login.get(), password.get()):
+            user_interface = UserInterface(login.get(), password.get())
             Menu(window, user_interface)
         else:
             messagebox.showerror('Ошибка', 'Неверный логин или пароль')
@@ -83,7 +82,6 @@ def SignUp(window):
     password2 = StringVar()
 
     def try_to_signup(login, password, password2):
-        # print(f'Регистрация: {login.get()}:{password.get()}:{password2.get()}')
         if not (UserInterface.is_login_exist(login.get())) and (password.get() == password2.get()):
             UserInterface.add_new_user(login.get(), password.get())
             user_interface = UserInterface(login.get(), password.get())
@@ -170,8 +168,6 @@ def DesksList(window, user_interface, desks):
     # создаем стиль для кнопок
     button_style = {"bg": "#6DB0E3", "fg": "#043C66", "font": ("Arial Black", 12), "bd": 0, "activebackground": "#304D63"}
 
-    desks = [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'хйу') , (2, 'Нееееет', 1, 'bob') , (3, 'ДОСКА', 0, 'хйу') , (4, 'Доска для 2112', 0, 'Adasd')]
-
     if len(desks) > 0:
         # создаем кнопки
         button_back = Button(window, text="Назад", command=lambda: Menu(window, user_interface), **button_style)
@@ -186,11 +182,12 @@ def DesksList(window, user_interface, desks):
         # привязываем фрейм к канвасу и настраиваем прокрутку
         canvas.create_window((0, 0), window=frame, anchor='nw')
         canvas.configure(yscrollcommand=scrollbar.set)
+        i=0
         for desk in desks:
             button_desks.append(Button(frame, text=f"{desk[1]}", command=lambda desk=desk: Desk(window, user_interface, desk), **button_style))
-            button_desks[desk[0]].config(width=15, height=1)
-            button_desks[desk[0]].pack(padx=45, pady=5)
-
+            button_desks[i].config(width=15, height=1)
+            button_desks[i].pack(padx=45, pady=5)
+            i+=1
             # обновляем геометрию фрейма и канваса
             frame.update_idletasks()
             canvas.config(scrollregion=canvas.bbox("all"))
@@ -397,6 +394,44 @@ def Desk(window, user_interface, desk):
         button_cancel.place(relx=0.3, rely=0.8, anchor="center")
         button_cardstatus.place(relx=0.5, rely=0.6, anchor="center")
 
+    # функция добавления столбца
+    def add_column(desk_id):
+        editwindow = Tk()
+        editwindow.geometry("450x550")
+        editwindow.title("Добавление столбца")
+        editwindow.config(bg='#D7E3F5')
+
+        column_name = StringVar()
+
+        # функция подтверждения изменений
+        def confirm_changes(column_name):
+            if user_interface.add_column_to_desk(desk_id, column_name):
+                messagebox.showinfo('Добавление столбца', 'Столбец был успешно добавлен')
+                editwindow.destroy()
+            else:
+                messagebox.showerror('Ошибка', 'Во время добавления столбца произошла ошибка')
+                editwindow.destroy()
+
+        # создаем стили
+        label_style = {"bg": '#D7E3F5', "fg": "#043C66", "font": ("Calibri", 14)}
+        entry_style = {"bg": "white", "fg": "#043C66", "font": ("Calibri", 14), "width": 20, "bd": 0}
+        button_style = {"fg": "#043C66", "font": ("Arial Black", 12), "bd": 0, "activebackground": "#304D63"}
+
+        # создаем текстовые поля и кнопки
+        label_title = Label(editwindow, text="Название:", **label_style)
+        entry_title = Entry(editwindow, textvariable=column_name, **entry_style)
+        button_confirm = Button(editwindow, text="Подтвердить", command=lambda: confirm_changes(column_name.get()), bg='#78e082', **button_style)
+        button_cancel = Button(editwindow, text="Отмена", bg='#e07878', command=lambda: editwindow.destroy(), **button_style)
+
+        # задаем размеры кнопок
+        button_confirm.config(width=15, height=1)
+        button_cancel.config(width=10, height=1)
+
+        # располагаем текст, поля для ввода и кнопки
+        label_title.place(relx=0.38, rely=0.45, anchor="e")
+        entry_title.place(relx=0.4, rely=0.45, anchor="w")
+        button_confirm.place(relx=0.7, rely=0.8, anchor="center")
+        button_cancel.place(relx=0.3, rely=0.8, anchor="center")
 
     # удаляем элементы окна
     for widget in window.winfo_children():
@@ -411,79 +446,186 @@ def Desk(window, user_interface, desk):
 
         # создаем стиль для кнопок и текста
         button_style = {"bg": "#6DB0E3", "fg": "#043C66", "font": ("Arial Black", 12), "bd": 0,"activebackground": "#304D63"}
-        button_style2 = {"bg": "#92ebd3", "fg": "#000000", "font": ("Calibri", 13), "bd": 0,"activebackground": "#304D63"}
+        button_style2 = {"bg": "#92ebd3", "fg": "#000000", "bd": 0,"activebackground": "#304D63"}
         button_style3 = {"bg": "#902d23", "fg": "#000000", "font": ("Arial Black", 12), "bd": 0,"activebackground": "#304D63"}
 
         # создаем кнопки и текст
         button_back = Button(window, text="Назад", command=lambda: Menu(window, user_interface), **button_style)
-        button_deskname = Button(window, text=f"{desk[1]}", command=lambda: RenameDesk(window, user_interface, desk), **button_style2)
-        button_rights = Button(window, text="Права доступа", command=lambda: EditRights(window, user_interface, desk), **button_style2)
-        button_delete = Button(window, text="Удалить", command=lambda: try_to_delete(desk[0]), **button_style3)
+        button_deskname = Button(window, text=f"{desk[1]}", command=lambda: RenameDesk(window, user_interface, desk), font = ("Arial Black", 12), **button_style2)
+        button_rights = Button(window, text="Права доступа", command=lambda: EditRights(window, user_interface, desk), font = ("Calibri", 11), **button_style2)
         desk_author = Label(window, text=f"Создал {desk[3]}", bg="#D7E3F5", fg="#043C66", font=("Calibri", 12))
         type = Label(window, text=f"{desk_type}", bg="#D7E3F5", fg="#043C66", font=("Calibri", 12))
 
         # задаем размеры кнопок
         button_back.config(width=10, height=1)
-        button_deskname.config(width=12, height=1)
+        button_deskname.config(width=15, height=1)
         button_rights.config(width=12, height=1)
 
         # располагаем кнопки и текст
-        button_back.place(relx=0.05, rely=0.05, anchor="w")
+        button_back.place(relx=0.15, rely=0.05, anchor="center")
         button_deskname.place(relx=0.5, rely=0.05, anchor="center")
         button_rights.place(relx=0.95, rely=0.05, anchor="e")
-        button_delete.place(relx=0.99, rely=0.95, anchor="e")
         type.place(relx=0.15, rely=0.95, anchor="center")
         desk_author.place(relx=0.5, rely=0.95, anchor="center")
 
-        # создаем контейнер для столбцов с возможностью прокрутки
-        maincanvas = Canvas(window, bg='#D7E3F5')
-        mainscrollbar = Scrollbar(window, orient=HORIZONTAL, command=maincanvas.xview)
-        mainframe = Frame(maincanvas)
-        mainframe.config(bg='#D7E3F5')
+        def on_configure(event):
+            maincanvas.configure(scrollregion=maincanvas.bbox("all"))
 
-        # привязываем фрейм к канвасу и настраиваем прокрутку
-        maincanvas.create_window((0, 0), window=mainframe, anchor='nw')
-        maincanvas.config(xscrollcommand=mainscrollbar.set)
+        maincanvas = Canvas(window, bg='#D7E3F5')
+        maincanvas.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.77, anchor='n')
+
+        mainscrollbar = Scrollbar(window, orient=HORIZONTAL, command=maincanvas.xview)
+        mainscrollbar.place(relx=0.5, rely=0.87, relheight=0.03, anchor='n', relwidth=0.9)
+
+        mainframe = Frame(maincanvas, bg='#D7E3F5')
+
+        maincanvas.create_window((0, 0), window=mainframe, anchor="nw")
+        maincanvas.bind("<Configure>", on_configure)
+
         i = 0
         for id, title in columns.items():
-            # создаем контейнер для кнопок с возможностью прокрутки
-            canvas = Canvas(maincanvas, bg='#D7E3F5')
-            scrollbar = Scrollbar(maincanvas, orient=VERTICAL, command=canvas.yview)
-            frame = Frame(canvas)
-            frame.config(bg='#D7E3F5')
+            canvas = Canvas(mainframe, bg='#D7E3F5', width=200, height=423.5)
+            canvas.grid(row=0, column=i, sticky="nsew")
+            mainframe.columnconfigure(i, weight=2)
 
-            # привязываем фрейм к канвасу и настраиваем прокрутку
-            canvas.create_window((0, 0), window=frame, anchor='nw')
+            scrollbar = Scrollbar(mainframe, orient=VERTICAL, command=canvas.yview)
+            scrollbar.grid(row=0, column=i + 1, sticky="ns")
+            mainframe.columnconfigure(i + 1, weight=0)
+
+            frame = Frame(canvas, bg='#D7E3F5')
+
+            canvas.create_window((0, 0), window=frame, anchor="nw")
+
             canvas.configure(yscrollcommand=scrollbar.set)
-            button_card = []
-            button = Button(frame, text=f"{id[1]}", command = lambda: (edit_column(id[0],id[1]), Desk(window, user_interface, desk)), **{"bg": "#D7E3F5", "fg": "#2c2c2c", "font": ("Arial Black", 12), "bd": 0,"activebackground": "#304D63"})
-            button.config(width=12, height=1)
-            button.pack(padx=25, pady=5)
-            for card in title:
-                button = Button(frame, text=f"{card[1]}", command=lambda card=card: Card(window, user_interface, user_interface.get_full_card_info(card[0]), desk), **button_style2)
 
+            button_card = []
+            button = Button(frame, text=f"{id[1]}",command = lambda: (edit_column(id[0],id[1]), Desk(window, user_interface, desk)), bg="#D7E3F5", fg="#2c2c2c", font=("Arial Black", 12), bd=0, activebackground="#304D63")
+            button.config(width=12, height=1)
+            button.pack(padx=10, pady=5)
+
+            for card in title:
+                if card[2] == '1':
+                    background_color = '#87e078'
+                elif card[2] == '2':
+                    background_color = '#e0da78'
+                elif card[2] == '3':
+                    background_color = '#e07878'
+                else:
+                    background_color = '#D7E3F5'
+                button = Button(frame, text=f"{card[1]}", bg=background_color, command = lambda card=card: Card(window, user_interface, user_interface.get_full_card_info(card[0]), desk),fg="#2c2c2c", font=("Arial", 14), bd=0, activebackground="#304D63")
                 button.config(width=15, height=1)
-                button.pack(padx=25, pady=5)
+                button.pack(padx=10, pady=5)
                 button_card.append(button)
 
-                # обновляем геометрию фрейма и канваса
-                frame.update_idletasks()
-                canvas.config(scrollregion=canvas.bbox("all"))
-
-            button = Button(frame, text=f"+ Добавить карточку", command=lambda:(add_card(desk[0],card[0]), Desk(window, user_interface, desk)), **{"bg": "#D7E3F5", "fg": "#2c2c2c", "font": ("Arial", 10), "bd": 0,"activebackground": "#304D63"})
+            button = Button(frame, text="+ Добавить карточку", command=lambda:(add_card(desk[0],card[0]), Desk(window, user_interface, desk)), bg="#D7E3F5", fg="#2c2c2c", font=("Arial", 12), bd=0, activebackground="#304D63")
             button.config(width=20, height=2)
-            button.pack(padx=25, pady=5)
+            button.pack(padx=10, pady=5)
 
-            # обновляем геометрию фрейма и канваса
-            mainframe.update_idletasks()
-            maincanvas.config(scrollregion=canvas.bbox("all"))
+            frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
 
-            canvas.place(relx=i, rely=0.5, relwidth=0.5, relheight=0.99, anchor='w')
-            scrollbar.place(relx=0.5 + i, rely=0.5, relheight=1, anchor='center', relwidth=0.05)
-            i += 0.525
+            i += 2
 
+        canvas = Canvas(mainframe, bg='#D7E3F5', width=200, height=423.5)
+        canvas.grid(row=0, column=i, sticky="nsew")
+        mainframe.columnconfigure(i, weight=2)
+
+        scrollbar = Scrollbar(mainframe, orient=VERTICAL, command=canvas.yview)
+        scrollbar.grid(row=0, column=i + 1, sticky="ns")
+        mainframe.columnconfigure(i + 1, weight=0)
+
+        frame = Frame(canvas, bg='#D7E3F5')
+
+        canvas.create_window((0, 0), window=frame, anchor="nw")
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        button = Button(frame, text="+ Добавить столбец",command=lambda: (add_column(desk[0]), Desk(window, user_interface, desk)), bg="#D7E3F5",fg="#2c2c2c", font=("Arial", 12), bd=0, activebackground="#304D63")
+        button.config(width=18, height=2)
+        button.pack(padx=10, pady=5)
+
+        frame.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox("all"))
+
+        maincanvas.update_idletasks()
+        maincanvas.configure(scrollregion=maincanvas.bbox("all"))
+
+    else:
+
+        # создаем стиль для кнопок и текста
+        button_style = {"bg": "#6DB0E3", "fg": "#043C66", "font": ("Arial Black", 12), "bd": 0,"activebackground": "#304D63"}
+
+        # создаем кнопки и текст
+        button_back = Button(window, text="Назад", command=lambda: Menu(window, user_interface), **button_style)
+        desk_name = Label(window, text=f"{desk[1]}", font = ("Arial Black", 12), bg="#D7E3F5", fg="#043C66",)
+        desk_author = Label(window, text=f"Создал {desk[3]}", bg="#D7E3F5", fg="#043C66", font=("Calibri", 12))
+        type = Label(window, text=f"{desk_type}", bg="#D7E3F5", fg="#043C66", font=("Calibri", 12))
+
+        # задаем размеры кнопок
+        button_back.config(width=10, height=1)
+
+        # располагаем кнопки и текст
+        button_back.place(relx=0.15, rely=0.05, anchor="center")
+        desk_name.place(relx=0.5, rely=0.05, anchor="center")
+        type.place(relx=0.15, rely=0.95, anchor="center")
+        desk_author.place(relx=0.5, rely=0.95, anchor="center")
+
+        def on_configure(event):
+            maincanvas.configure(scrollregion=maincanvas.bbox("all"))
+
+        maincanvas = Canvas(window, bg='#D7E3F5')
         maincanvas.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.77, anchor='n')
+
+        mainscrollbar = Scrollbar(window, orient=HORIZONTAL, command=maincanvas.xview)
         mainscrollbar.place(relx=0.5, rely=0.87, relheight=0.03, anchor='n', relwidth=0.9)
+
+        mainframe = Frame(maincanvas, bg='#D7E3F5')
+
+        maincanvas.create_window((0, 0), window=mainframe, anchor="nw")
+        maincanvas.bind("<Configure>", on_configure)
+
+        i = 0
+        for id, title in columns.items():
+            canvas = Canvas(mainframe, bg='#D7E3F5', width=200, height=423.5)
+            canvas.grid(row=0, column=i, sticky="nsew")
+            mainframe.columnconfigure(i, weight=2)
+
+            scrollbar = Scrollbar(mainframe, orient=VERTICAL, command=canvas.yview)
+            scrollbar.grid(row=0, column=i + 1, sticky="ns")
+            mainframe.columnconfigure(i + 1, weight=0)
+
+            frame = Frame(canvas, bg='#D7E3F5')
+
+            canvas.create_window((0, 0), window=frame, anchor="nw")
+
+            canvas.configure(yscrollcommand=scrollbar.set)
+
+            button_card = []
+            button = Label(frame, text=f"{id[1]}", bg="#D7E3F5", fg="#2c2c2c", font=("Arial Black", 12))
+            button.config(width=12, height=1)
+            button.pack(padx=10, pady=5)
+
+            for card in title:
+                if card[2] == '1':
+                    background_color = '#87e078'
+                elif card[2] == '2':
+                    background_color = '#e0da78'
+                elif card[2] == '3':
+                    background_color = '#e07878'
+                else:
+                    background_color = '#D7E3F5'
+                button = Button(frame, text=f"{card[1]}", bg=background_color, command = lambda card=card: Card(window, user_interface, user_interface.get_full_card_info(card[0]), desk),fg="#2c2c2c", font=("Arial", 14), bd=0, activebackground="#304D63")
+                button.config(width=15, height=1)
+                button.pack(padx=10, pady=5)
+                button_card.append(button)
+
+            frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+
+            i += 2
+
+        maincanvas.update_idletasks()
+        maincanvas.configure(scrollregion=maincanvas.bbox("all"))
 
 def RenameDesk(window, user_interface, desk):
 
@@ -673,6 +815,7 @@ def Card(window, user_interface, card, desk):
     button_cardname = Label(window, text=f"{card['card_title']}", bg=background_color, fg="#043C66", font=("Arial Black", 16))
     button_edittext = Button(window, text = "Изменить название или текст", command=lambda: card_edit(card['card_id'], card['card_title'], card['card_text']), **button_style2)
     button_cardstatus = Button(window, text = f"Статус: {card['card_status']}", command=lambda: (change_status(window, user_interface, card), Card(window, user_interface, card, desk)), **button_style1)
+    label_cardstatus = Label(window, text=f"Статус: {card['card_status']}", bg= background_color, fg= "#000000", font= ("Arial Black", 14))
     text = Label(window, text=f"{card['card_text']}", bg=background_color, fg="#000000", font=("Calibri", 14))
     author = Label(window, text=f"Создал {card['card_author_login']}", bg=background_color, fg="#043C66", font=("Calibri", 12))
 
@@ -685,15 +828,14 @@ def Card(window, user_interface, card, desk):
     # располагаем кнопки
     button_back.place(relx=0.15, rely=0.05, anchor="center")
     button_cardname.place(relx=0.5, rely=0.3, anchor="center")
-    button_edittext.place(relx=0.5, rely=0.65, anchor="center")
-    button_cardstatus.place(relx=0.5, rely=0.75, anchor="center")
+    if user_interface.can_edit_desk(desk[0]):
+        button_edittext.place(relx=0.5, rely=0.65, anchor="center")
+        button_cardstatus.place(relx=0.5, rely=0.75, anchor="center")
+    else:
+        label_cardstatus.place(relx=0.5, rely=0.75, anchor="center")
     text.place(relx=0.5, rely=0.5, anchor="center")
     author.place(relx=0.5, rely=0.95, anchor="center")
 
-# login=''
-# password=''
-# user_interface = UserInterface(login, password)
-# desk = (0, 'Доска 1', 0, 'Myself')
 window = Tk()
 window.geometry("450x550")
 window.title("TaskManager")
