@@ -221,4 +221,4 @@ if __name__ == '__main__':
     # desk1.create_desk("Sergey desk", "Sergey", 1)
     # desk1.create_desk("Sergey desk2", "Sergey", 1)
     # desk1.create_desk("Misha desk3", "Misha", 1)
-    print(desk1.get_owned_desks("Misha"))
+    # print(desk1.get_owned_desks("Misha"))
