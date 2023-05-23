@@ -5,9 +5,13 @@ from loader import connect, db_of_users, db_of_desks
 class UserInterface:
     def __init__(self, login, password):
         if not self.try_log_in(login, password):
-            raise Exception('Пользователя с такими данными не существует! Неверен логин/пароль!')
-        self.login = login
-        self.password = password
+            print('Пользователя с такими данными не существует! Неверен логин/пароль!')
+            # raise Exception('Пользователя с такими данными не существует! Неверен логин/пароль!')
+        else:
+            print(self.try_log_in(login, password))
+            self.login = login
+            self.password = password
+            print(f"login:{login}; password: {password}")
 
     @staticmethod
     def is_login_exist(login):
@@ -62,32 +66,34 @@ class UserInterface:
         # возвращает id пользователя по логину (логин уникален для каждого пользователя)
         # return 1
 
-    def create_desk(self, desk_name, desk_type):
-        users = db_of_desks.create_desk(desk_name, desk_type)
+    def create_desk(self, desk_name, desk_type=True):
+        users = db_of_desks.create_desk(self.login, desk_name, desk_type)
         # создаём доску в бд
         # владелец доски self.login
         # True - доска успешно создана
-        print(f'Создана доска: {desk_name}:{desk_type}')
+        # False - доска с таким именем уже существует
         return True
 
     def get_owned_desks(self):
         # список досок которыми владает пользователь (self.login) в формате (desk_id, desk_name, public, owner_login)
         print(f'Получаем список досок для {self.login}')
-        users = db_of_desks.get_owned_desks()
-        print(f'Доски для {self.login}: {users}')
+        users = db_of_desks.get_owned_desks(self.login)
+        print(users)
         return users
         # return [(0, 'Доска 1', 0, 'Myself'), (1, 'Доска для 2112', 1, 'Myself')]
 
     def get_public_desks(self):
         # список публичных досок досок в формате (desk_id, desk_name, public, owner)
+        print(f'Получаем весь список досок для {self.login}')
         users = db_of_desks.get_public_desks()
+        print(users)
         return users
         # return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
 
     def can_edit_desk(self, desk_id):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
-        users = db_of_desks.can_edit_desk(desk_id)
+        users = db_of_desks.can_edit_desk(desk_id, self.login)
         if users:
             return True
         else:
@@ -194,9 +200,9 @@ class UserInterface:
 
     def get_all_user(self):
         # список всех пользователе (user_id, login)
-        # users = db_of_users.get_all_users()
-        # return users
-        return [(1, 'Bob'), (3, 'Sera')]
+        users = db_of_users.get_all_users()
+        return users
+        # return [(1, 'Bob'), (3, 'Sera')]
 
     def get_all_user_with_edit_rights(self, desk_id):
         # список всех пользователе (user_id, login, can_edit_desk)
@@ -204,10 +210,8 @@ class UserInterface:
         # (актуально только для общественных досок)
         return [(1, 'Bob', 0), (3, 'Sera', 1), (33, 'Pol', 1)]
 
-
-if __name__ == '__main__':
-    UserInterface.add_new_user('rere', '113')
-    r = UserInterface.try_log_in('rere', 113)
-
-    print(r)
-
+user1 = UserInterface("stepa", "22")
+# user2 = UserInterface("Gleb", "Kim")
+# # user1.create_desk("misha desk3", 0)
+# user2.create_desk("gleb desk", 1)
+# print(user2.get_owned_desks())
