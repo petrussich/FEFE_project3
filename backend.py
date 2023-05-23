@@ -6,12 +6,12 @@ class UserInterface:
     def __init__(self, login, password):
         if not self.try_log_in(login, password):
             print('Пользователя с такими данными не существует! Неверен логин/пароль!')
-            # raise Exception('Пользователя с такими данными не существует! Неверен логин/пароль!')
+            raise Exception('Пользователя с такими данными не существует! Неверен логин/пароль!')
         else:
             print(self.try_log_in(login, password))
             self.login = login
             self.password = password
-            print(f"login:{login}; password: {password}")
+            # print(f"login:{login}; password: {password}")
 
     @staticmethod
     def is_login_exist(login):
@@ -24,7 +24,6 @@ class UserInterface:
         # проверяет существует ли пользователь с указанным логином
         # True - существует
         # False - нет существует
-
 
     @staticmethod
     def try_log_in(login, password):
@@ -210,8 +209,10 @@ class UserInterface:
         # (актуально только для общественных досок)
         return [(1, 'Bob', 0), (3, 'Sera', 1), (33, 'Pol', 1)]
 
-user1 = UserInterface("stepa", "22")
-# user2 = UserInterface("Gleb", "Kim")
-# # user1.create_desk("misha desk3", 0)
-# user2.create_desk("gleb desk", 1)
-# print(user2.get_owned_desks())
+
+if __name__ == '__main__':
+    user1 = UserInterface("stepa", "22")
+    # user2 = UserInterface("Gleb", "Kim")
+    # # user1.create_desk("misha desk3", 0)
+    # user2.create_desk("gleb desk", 1)
+    # print(user2.get_owned_desks())
