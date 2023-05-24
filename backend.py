@@ -89,11 +89,11 @@ class UserInterface:
         return users
         # return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
 
-    @staticmethod
-    def can_edit_desk(desk_id, login):
+
+    def can_edit_desk(self,desk_id):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
-        users = db_of_desks.can_edit_desk(desk_id, login)
+        users = db_of_desks.can_edit_desk(desk_id, self.login)
         if users:
             return True
         else:
@@ -142,7 +142,7 @@ class UserInterface:
     def add_column_to_desk(self, desk_id, column_name):
         # добавляем новый столбец на доску
         # создание новой колонки в бд
-        users = db_of_desks.add_column_to_deskk(desk_id,column_name)
+        users = db_of_desks.add_column_to_desk(desk_id,column_name)
         return True
 
     def add_card_to_column(self, card_title, card_status, card_desk_id, card_column_id):
