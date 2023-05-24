@@ -227,12 +227,12 @@ class DesksDB:
         return result
         # список публичных досок досок в формате (desk_id, desk_name, public, owner_login)
 
-
-    def can_edit_desk(self, desk_id, login):
+    @staticmethod
+    def can_edit_desk(connection, desk_id, login):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
         sql = "SELECT user_login FROM editing_rights WHERE desk_id = ?, user_login = ? AND can_edit_desk = 1"
-        result = self.connection.execute(sql, (desk_id,login), fetchone=True)
+        result = connection.execute(sql, (desk_id,login), fetchone=True)
         # TODO: Доделать проверку на наличие прав редактирования из таблицы "права на редактирования"
         if result is not None and result[0] == login:
             return True

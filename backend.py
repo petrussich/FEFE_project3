@@ -89,10 +89,11 @@ class UserInterface:
         return users
         # return [(33, 'Доска 333', 1, 'Sera'), (222, 'Доска 77', 1, 'Bob')]
 
-    def can_edit_desk(self, desk_id):
+    @staticmethod
+    def can_edit_desk(desk_id, login):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
-        users = db_of_desks.can_edit_desk(desk_id, self.login)
+        users = db_of_desks.can_edit_desk(desk_id, login)
         if users:
             return True
         else:
