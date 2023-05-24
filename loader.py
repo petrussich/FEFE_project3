@@ -3,6 +3,8 @@ connect = DataBaseConnection()
 db_of_users = UsersDB(connect)
 db_of_desks = DesksDB(connect)
 
+db_of_desks.create_cards_table()
+db_of_users.create_editing_rights_table()
 # db_of_users.add_new_user(connect, "Roma", "Slepchenko")
 # db_of_users.add_new_user(connect, "Sergey", "Pristup")
 # UsersDB.add_new_user(conn1, "Gleb", "Kim")
