@@ -109,8 +109,9 @@ class UserInterface:
     @staticmethod
     # TODO: дописать функцию
     def get_column_name_by_column_id(column_id):
-        # column_name - не уникален
-        return 'column_name'
+        connection_users = connect
+        users = db_of_desks.get_column_name_by_column_id(connection_users, column_id)
+        return users
 
     def change_desk_name(self, desk_id, new_desk_name):
         # изменяем имя доски в бд
@@ -122,79 +123,94 @@ class UserInterface:
     def change_column_name(self, column_id, new_column_name):
         # изменяем имя column в бд
         # True - успешно
+        users = db_of_desks.change_column_name(column_id, new_column_name)
         return True
 
     def del_column(self, column_id):
         # удоляем колонку из бд
         # True - успешно
+        users = db_of_desks.del_column(column_id)
         return True
 
     def del_desk(self, desk_id):
         # удоляем desk из бд
         # True - успешно
+        users = db_of_desks.del_desk(desk_id)
         return True
 
     def add_column_to_desk(self, desk_id, column_name):
         # добавляем новый столбец на доску
         # создание новой колонки в бд
+        users = db_of_desks.add_column_to_deskk(desk_id,column_name)
         return True
 
     def add_card_to_column(self, card_title, card_status, card_desk_id, card_column_id):
         # добавляем карточку в конец колонки + в бд
+        users = db_of_desks.add_card_to_column(card_title, card_status, card_desk_id, card_column_id)
         return True
 
     def get_desk_card(self, desk_id):
         # возвращает карточки в desk в формате:
-        cards = {
-            ('column_id', 'название столбца'): [
-                ('card_id', 'card_title', 'card_status', 'card_number_in_column'),
-                ('0', 'Заголовок', '1', '0'),
-            ]
-        }
-        return {
-            (22, 'Столбец 1'): [
-                ('0', 'Заголовок 1', '1', '0'),
-                ('1', 'Заголовок 2', '1', '1'),
-                ('2', 'Заголовок 3', '2', '3'),
-            ],
-            (32, 'Столбец 2'): [
-                ('33', 'Заголовок 1', '0', '0'),
-                ('43', 'Заголовок ttt', '3', '1'),
-            ]
-        }
+        #cards = {
+           # ('column_id', 'название столбца'): [
+               # ('card_id', 'card_title', 'card_status', 'card_number_in_column'),
+               # ('0', 'Заголовок', '1', '0'),
+           # ]
+       # }
+        users = db_of_desks.get_desk_card(desk_id)
+        return users
+        #{
+           # (22, 'Столбец 1'): [
+              # ('0', 'Заголовок 1', '1', '0'),
+               # ('1', 'Заголовок 2', '1', '1'),
+               # ('2', 'Заголовок 3', '2', '3'),
+           # ],
+            #(32, 'Столбец 2'): [
+               # ('33', 'Заголовок 1', '0', '0'),
+               # ('43', 'Заголовок ttt', '3', '1'),
+            #]
+       # }
 
     def get_full_card_info(self, card_id):
-        return {
-            'card_id': '11',
-            'card_title': 'Title 555',
-            'card_text': 'lorem text',
-            'card_status': 2,
-            'card_author_login': 'Sergey',
-            'card_desk_id': 3,
-            'card_column_id': 333,
-            'card_number_in_column': 33
-        }
+        users = db_of_desks.get_full_card_info(card_id)
+        return users
+            #{
+           # 'card_id': '11',
+           # 'card_title': 'Title 555',
+            #'card_text': 'lorem text',
+            #'card_status': 2,
+           # 'card_author_login': 'Sergey',
+            #'card_desk_id': 3,
+            #'card_column_id': 333,
+           # 'card_number_in_column': 33
+        #}
 
     def change_card_title(self, card_id, new_title):
+        users = db_of_desks.change_card_title(card_id,new_title)
         return True
 
     def change_card_text(self, card_id, new_text):
+        users = db_of_desks.change_card_text(card_id, new_text)
         return True
 
     def change_card_status(self, card_id, new_status):
+        users = db_of_desks.change_card_text(card_id, new_status)
         return True
 
     def move_card(self, card_id, current_column_id, new_column_id, card_number_in_new_column):
         # перемещает карточку в новый столбец
         # нужно перезаписать card_number_in_column для всех карточек в current_column_id и new_column_id
+        users = db_of_desks.move_card(card_id, current_column_id, new_column_id, card_number_in_new_column)
         return True
 
     def add_edit_rights_on_public_desk(self, user_id, desk_id):
         # добавляет пользователя права на редактирование публичной доски
+        users = db_of_users.add_edit_rights_on_public_desk(user_id, desk_id)
         return True
 
     def del_edit_rights_on_public_desk(self, user_id, desk_id):
         # удаляет пользователя права на редактирование публичной доски
+        users = db_of_users.del_edit_rights_on_public_desk(user_id, desk_id)
         return True
 
     def get_all_user(self):
@@ -207,7 +223,8 @@ class UserInterface:
         # список всех пользователе (user_id, login, can_edit_desk)
         # can_edit_desk - может ли пользователь редактировать доску с desk_id
         # (актуально только для общественных досок)
-        return [(1, 'Bob', 0), (3, 'Sera', 1), (33, 'Pol', 1)]
+        users = db_of_users.get_all_user_with_edit_rights(desk_id)
+        return users
 
 
 if __name__ == '__main__':

@@ -111,6 +111,61 @@ class UsersDB:
             # print("Логин пользователя по его id: ")
             return login
 
+    def create_editing_rights_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS `editing_rights` (
+            'user_id' INTEGER REFERENCES users(user_id),
+            'user_login' VARCHAR(255) REFERENCES users(login),
+            'can_edit_desk' BOOLEAN not null,
+            'desk_id' INTEGER REFERENCES desk(desk_id)
+        )'''
+
+    def get_all_user(self):
+        # список всех пользователе (user_id, login)
+
+        sql = "SELECT * FROM users"
+        result = self.connection.execute(sql, fetchall=True)
+        users = []
+        for item in result:
+            users.append((
+                item[0],
+                item[1]
+            ))
+
+        return users
+
+    def get_all_user_with_edit_rights(self, desk_id):
+        # список всех пользователе (user_id, login, can_edit_desk)
+        # can_edit_desk - может ли пользователь редактировать доску с desk_id
+        # (актуально только для общественных досок)
+
+        sql = "SELECT * FROM editing_rights WHERE desk_id = ? AND can_edit_desk = 1 "
+        result = self.connection.execute(sql, (desk_id,), fetchall=True)
+        users = []
+        for item in result:
+            users.append((
+                item[0],
+                item[1],
+                item[2]
+            ))
+
+        return users
+
+    def add_edit_rights_on_public_desk(self, user_id, desk_id):
+        # добавляет пользователя права на редактирование публичной доски
+
+        update = "UPDATE editing_rights SET can_edit_desk = 1 WHERE desk_id = ? AND user_id = ?"
+        self.connection.execute(update, (desk_id, user_id), commit=True)
+
+        return True
+
+    def del_edit_rights_on_public_desk(self, user_id, desk_id):
+        # удаляет пользователя права на редактирование публичной доски
+
+        update = "UPDATE editing_rights SET can_edit_desk = 0 WHERE desk_id = ? AND user_id = ?"
+        self.connection.execute(update, (desk_id, user_id), commit=True)
+
+        return True
+
 
     @staticmethod
     def get_user_id_by_login(connection, login):
@@ -176,8 +231,8 @@ class DesksDB:
     def can_edit_desk(self, desk_id, login):
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
-        sql = "SELECT owner_login FROM desks WHERE desk_id=?"
-        result = self.connection.execute(sql, (desk_id,), fetchone=True)
+        sql = "SELECT user_login FROM editing_rights WHERE desk_id = ?, user_login = ? AND can_edit_desk = 1"
+        result = self.connection.execute(sql, (desk_id,login), fetchone=True)
         # TODO: Доделать проверку на наличие прав редактирования из таблицы "права на редактирования"
         if result is not None and result[0] == login:
             return True
@@ -195,10 +250,11 @@ class DesksDB:
 
     @staticmethod
      # TODO: Дописать функцию, она свзяана с функцией add_column_to_desk из твоей части
-    def get_column_name_by_column_id(column_id):
-
+    def get_column_name_by_column_id(connection,column_id):
+        sql = "SELECT column_name FROM columns WHERE column_id = ?"
+        column_name = connection.execute(sql, (column_id,), fetchone=True)
         # column_name - не уникален
-        return 'column_name'
+        return column_name
 
 
     def change_desk_name(self, desk_id, new_desk_name):
@@ -208,6 +264,182 @@ class DesksDB:
         sql = "UPDATE desks SET desk_name = ? WHERE desk_id = ?"
         self.connection.execute(sql, (new_desk_name, desk_id), commit=True)
         print(f"Имя доски изменено на {new_desk_name}!")
+        return True
+
+    def create_cards_table(self):
+        sql = '''create table IF NOT EXISTS `cards` (
+             'card_id' INTEGER PRIMARY KEY AUTOINCREMENT not null,
+             'card_title' VARCHAR(255) not null,
+             'card_text' VARCHAR(255) not null,
+             'card_status' INTEGER not null,
+             'card_author_login' VARCHAR(255) REFERENCES users(login),
+             'card_desk_id' INTEGER REFERENCES desks(desk_id),
+             'card_column_id' INTEGER REFERENCES columns(column_id),
+             'card_number_in_column' INTEGER not null
+           )'''
+        self.connection.execute(sql, commit=True)
+        return True
+
+    def del_column(self, column_id):
+        # удоляем колонку из бд
+        # True - успешно
+        sql = "DELETE FROM columns WHERE column_id = ? "
+        self.connection.execute(sql, (column_id,), commit=True)
+        return True
+
+    def del_desk(self, desk_id):
+        # удоляем desk из бд
+        # True - успешно
+        sql = "DELETE FROM desks WHERE desk_id = ? "
+        self.connection.execute(sql, (desk_id,), commit=True)
+
+        return True
+
+    def add_column_to_desk(self, desk_id, column_name):
+        # добавляем новый столбец на доску
+        # создание новой колонки в бд
+        insert = """INSERT INTO columns(source_id,column_name) VALUES (?,?)"""
+        self.connection.execute(insert, (desk_id,column_name), commit=True)
+
+        return True
+
+    def add_card_to_column(self, card_title, card_status, card_desk_id, card_column_id,login):
+        # добавляем карточку в конец колонки + в бд
+        insert = """INSERT INTO cards(card_title,card_text,card_status,card_author_login,card_desk_id,card_column_id,
+        card_number_in_column) VALUES (?,?,?,?,?,?,?)"""
+        sql = "SELECT card_number_in_column FROM cards WHERE card_column_id = ?"
+        result = self.connection.execute(sql, (card_column_id,), fetchall=True)
+        las_element = max(result)
+        number = las_element[0]+1
+        self.connection.execute(insert, (card_title, "", card_status, login, card_desk_id, card_column_id,
+                                         number),
+                                commit=True)
+
+        return True
+
+    def get_desk_card(self, desk_id):
+        # возвращает карточки в desk в формате:
+        #cards = {
+           # ('column_id', 'название столбца'): [
+               # ('card_id', 'card_title', 'card_status', 'card_number_in_column'),
+                #('0', 'Заголовок', '1', '0'),
+           # ]
+       # }
+        sql = "SELECT column_id FROM columns WHERE source_id = ?"
+        numbers = self.connection.execute(sql, (desk_id,), fetchall=True)
+        cards = {}
+
+        for item in numbers:
+            sql = "SELECT column_id, column_name FROM columns WHERE card_column_id = ?"
+            columns = self.connection.execute(sql, (item[0],), fetchone=True)
+            sql = """SELECT card_id, card_title, card_status, card_number_in_column FROM cards WHERE card_desk_id = ? 
+            AND card_column_id = ?"""
+            cards_in_columns = self.connection.execute(sql, (desk_id,item[0],), fetchall=True)
+            cards[columns] = cards_in_columns
+
+        return cards
+        #{
+            #(22, 'Столбец 1'): [
+               # ('0', 'Заголовок 1', '1', '0'),
+                #('1', 'Заголовок 2', '1', '1'),
+               # ('2', 'Заголовок 3', '2', '3'),
+            #],
+            #(32, 'Столбец 2'): [
+               # ('33', 'Заголовок 1', '0', '0'),
+               # ('43', 'Заголовок ttt', '3', '1'),
+           # ]
+       # }
+
+
+
+
+    def get_full_card_info(self, card_id):
+
+        sql = "SELECT * FROM cards WHERE card_id = ?"
+        result = self.connection.execute(sql, (card_id,), fetchall=True)
+
+        if result is None:
+            return []
+        else:
+            card = []
+
+            for item in result:
+                card.append({
+                    'card_id': item[0],
+                    'card_title': item[1],
+                    'card_text': item[2],
+                    'card_status': item[3],
+                    'card_author_login': item[4],
+                    'card_desk_id': item[5],
+                    'card_column_id': item[6],
+                    'card_number_in_column': item[7]
+                })
+        return card
+
+
+    def change_card_title(self, card_id, new_title):
+
+        update = "UPDATE cards SET title = ? WHERE card_id = ?"
+        self.connection.execute(update, (new_title, card_id), commit=True)
+
+        return True
+
+
+    def change_card_text(self, card_id, new_text):
+
+        update = "UPDATE cards SET text = ? WHERE card_id = ?"
+        self.connection.execute(update, (new_text, card_id), commit=True)
+
+        return True
+
+
+    def change_card_status(self, card_id, new_status):
+
+        update = "UPDATE cards SET card_status = ? WHERE card_id = ?"
+        self.connection.execute(update, (new_status, card_id), commit=True)
+
+        return True
+
+
+    def move_card(self, card_id, current_column_id, new_column_id, card_number_in_new_column):
+        # перемещает карточку в новый столбец
+        # нужно перезаписать card_number_in_column для всех карточек в current_column_id и new_column_id
+        sql = "SELECT card_title FROM cards WHERE card_id = ?"
+        card_tittle = self.connection.execute(sql, (card_id,), fetchone=True)
+        sql = "SELECT card_text FROM cards WHERE card_id = ?"
+        card_text = self.connection.execute(sql, (card_id,), fetchone=True)
+        sql = "SELECT card_status FROM cards WHERE card_id = ?"
+        card_status = self.connection.execute(sql, (card_id,), fetchone=True)
+        sql = "SELECT card_author_login FROM cards WHERE card_id = ?"
+        card_author_login = self.connection.execute(sql, (card_id,), fetchone=True)
+        sql = "SELECT card_desk_id FROM cards WHERE card_id = ?"
+        card_desk_id = self.connection.execute(sql, (card_id,), fetchone=True)
+        sql = "SELECT card_number_in_column FROM cards WHERE card_id = ?"
+        card_number_in_column = self.connection.execute(sql, (card_id,), fetchone=True)
+
+        sql = "DELETE FROM cards WHERE card_id = ?"
+        self.connection.execute(sql, (card_id,), commit=True)
+        sql = "SELECT card_number_in column FROM cards WHERE card_column_id = ?"
+        result = self.connection.execute(sql,(current_column_id,), fetchall=True)
+
+        for item in range(len(result)):
+            if card_number_in_column < result[item][0]:
+                update = """UPDATE cards SET card_number_in_column = ? WHERE card_number_in_column = ? AND 
+                          card_column_id = ?"""
+                self.connection.execute(update, (result[item][0]-1, result[item][0], current_column_id), commit=True)
+
+        sql = "SELECT card_number_in column FROM cards WHERE card_column_id = ?"
+        result = self.connection.execute(sql,(new_column_id, ), fetchall=True)
+
+        for item in range(len(result)):
+            if card_number_in_new_column <= result[item][0]:
+                update = """UPDATE cards SET card_number_in_column = ? WHERE card_number_in_column = ? AND 
+                          card_column_id = ?"""
+                self.connection.execute(update, (result[item][0]+1, result[item][0], new_column_id), commit=True)
+        insert = "INSERT INTO cards VALUES (?,?,?,?,?,?,?,?)"
+        self.connection.execute(insert, (card_id, card_tittle, card_text, card_status, card_author_login,
+                                         card_desk_id, new_column_id, card_number_in_new_column), fetchall=True)
+
         return True
 
 if __name__ == '__main__':
