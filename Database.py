@@ -1,5 +1,5 @@
 import sqlite3
-import data.config
+#import data.config
 # from backend import UserInterface
 class DataBaseConnection:
     # def __init__(self, login, password, path_to_db=data.config.path_to_database):
@@ -7,7 +7,7 @@ class DataBaseConnection:
     #     self.password = password
     #     self.path_to_db = path_to_db
 
-    def __init__(self, path_to_db=data.config.path_to_database):
+    def __init__(self, path_to_db='data/MainDB.db'):
         # self.login
         # self.password
         self.path_to_db = path_to_db
@@ -239,6 +239,7 @@ class DesksDB:
             return True
         else:
             return False
+        return True
 
 
     @staticmethod
@@ -300,7 +301,7 @@ class DesksDB:
         # добавляем новый столбец на доску
         # создание новой колонки в бд
         insert = """INSERT INTO columns(source_id,column_name) VALUES (?,?)"""
-        self.connection.execute(insert, (desk_id,column_name), commit=True)
+        self.connection.execute(insert, (desk_id, column_name), commit=True)
 
         return True
 
@@ -308,10 +309,13 @@ class DesksDB:
         # добавляем карточку в конец колонки + в бд
         insert = """INSERT INTO cards(card_title,card_text,card_status,card_author_login,card_desk_id,card_column_id,
         card_number_in_column) VALUES (?,?,?,?,?,?,?)"""
-        sql = "SELECT card_number_in_column FROM cards WHERE card_column_id = ?"
+        sql = "SELECT card_number_in_column FROM cards WHERE card_column_id = ? and card_desk_id = ?"
         result = self.connection.execute(sql, (card_column_id,), fetchall=True)
-        las_element = max(result)
-        number = las_element[0]+1
+        if result is None:
+            number = 1
+        else:
+            last_element = max(result)
+            number = last_element[0] + 1
         self.connection.execute(insert, (card_title, "", card_status, login, card_desk_id, card_column_id,
                                          number),
                                 commit=True)
@@ -331,7 +335,7 @@ class DesksDB:
         cards = {}
 
         for item in numbers:
-            sql = "SELECT column_id, column_name FROM columns WHERE card_column_id = ?"
+            sql = "SELECT column_id, column_name FROM columns WHERE column_id = ?"
             columns = self.connection.execute(sql, (item[0],), fetchone=True)
             sql = """SELECT card_id, card_title, card_status, card_number_in_column FROM cards WHERE card_desk_id = ? 
             AND card_column_id = ?"""
@@ -416,20 +420,20 @@ class DesksDB:
         sql = "SELECT card_desk_id FROM cards WHERE card_id = ?"
         card_desk_id = self.connection.execute(sql, (card_id,), fetchone=True)
         sql = "SELECT card_number_in_column FROM cards WHERE card_id = ?"
-        card_number_in_column = self.connection.execute(sql, (card_id,), fetchone=True)
+        card_number_in_column = self.connection.execute(sql, (card_id,), fetchall=True)
 
         sql = "DELETE FROM cards WHERE card_id = ?"
         self.connection.execute(sql, (card_id,), commit=True)
-        sql = "SELECT card_number_in column FROM cards WHERE card_column_id = ?"
+        sql = "SELECT card_number_in_column FROM cards WHERE card_column_id = ?"
         result = self.connection.execute(sql,(current_column_id,), fetchall=True)
 
         for item in range(len(result)):
-            if card_number_in_column < result[item][0]:
+            if card_number_in_column[0][0] < result[item][0]:
                 update = """UPDATE cards SET card_number_in_column = ? WHERE card_number_in_column = ? AND 
                           card_column_id = ?"""
                 self.connection.execute(update, (result[item][0]-1, result[item][0], current_column_id), commit=True)
 
-        sql = "SELECT card_number_in column FROM cards WHERE card_column_id = ?"
+        sql = "SELECT card_number_in_column FROM cards WHERE card_column_id = ?"
         result = self.connection.execute(sql,(new_column_id, ), fetchall=True)
 
         for item in range(len(result)):
@@ -439,7 +443,7 @@ class DesksDB:
                 self.connection.execute(update, (result[item][0]+1, result[item][0], new_column_id), commit=True)
         insert = "INSERT INTO cards VALUES (?,?,?,?,?,?,?,?)"
         self.connection.execute(insert, (card_id, card_tittle, card_text, card_status, card_author_login,
-                                         card_desk_id, new_column_id, card_number_in_new_column), fetchall=True)
+                                         card_desk_id, new_column_id, card_number_in_new_column), commit=True)
 
         return True
 
