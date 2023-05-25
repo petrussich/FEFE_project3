@@ -303,6 +303,10 @@ class DesksDB:
         insert = """INSERT INTO columns(source_id,column_name) VALUES (?,?)"""
         self.connection.execute(insert, (desk_id, column_name), commit=True)
 
+        insert = """INSERT INTO cards(card_title,card_text,card_status,card_author_login,card_desk_id,card_column_id,
+                card_number_in_column) VALUES (?,?,?,?,?,?,?)"""
+        self.connection.execute(insert,("aaa","aa",1,"a", 1, 1,1), commit=True)
+
         return True
 
     def add_card_to_column(self, card_title, card_status, card_desk_id, card_column_id,login):
@@ -310,16 +314,19 @@ class DesksDB:
         insert = """INSERT INTO cards(card_title,card_text,card_status,card_author_login,card_desk_id,card_column_id,
         card_number_in_column) VALUES (?,?,?,?,?,?,?)"""
         sql = "SELECT card_number_in_column FROM cards WHERE card_column_id = ? and card_desk_id = ?"
-        result = self.connection.execute(sql, (card_column_id,), fetchall=True)
+        result = self.connection.execute(sql, (card_column_id,card_desk_id), fetchall=True)
+        m = []
+        last_element = 0
         if result is None:
             number = 1
         else:
-            last_element = max(result)
-            number = last_element[0] + 1
+            for i in range(len(result)):
+                m.append(result[i][0])
+                last_element = max(m)
+            number = last_element + 1
         self.connection.execute(insert, (card_title, "", card_status, login, card_desk_id, card_column_id,
                                          number),
                                 commit=True)
-
         return True
 
     def get_desk_card(self, desk_id):
@@ -384,7 +391,7 @@ class DesksDB:
 
     def change_card_title(self, card_id, new_title):
 
-        update = "UPDATE cards SET title = ? WHERE card_id = ?"
+        update = "UPDATE cards SET card_title = ? WHERE card_id = ?"
         self.connection.execute(update, (new_title, card_id), commit=True)
 
         return True
@@ -392,7 +399,7 @@ class DesksDB:
 
     def change_card_text(self, card_id, new_text):
 
-        update = "UPDATE cards SET text = ? WHERE card_id = ?"
+        update = "UPDATE cards SET card_text = ? WHERE card_id = ?"
         self.connection.execute(update, (new_text, card_id), commit=True)
 
         return True

@@ -148,7 +148,7 @@ class UserInterface:
 
     def add_card_to_column(self, card_title, card_status, card_desk_id, card_column_id):
         # добавляем карточку в конец колонки + в бд
-        users = db_of_desks.add_card_to_column(card_title, card_status, card_desk_id, card_column_id)
+        users = db_of_desks.add_card_to_column(card_title, card_status, card_desk_id, card_column_id, self.login)
         return True
 
     def get_desk_card(self, desk_id):
@@ -196,7 +196,7 @@ class UserInterface:
         return True
 
     def change_card_status(self, card_id, new_status):
-        users = db_of_desks.change_card_text(card_id, new_status)
+        users = db_of_desks.change_card_status(card_id, new_status)
         return True
 
     def move_card(self, card_id, current_column_id, new_column_id, card_number_in_new_column):
@@ -232,6 +232,7 @@ class UserInterface:
 if __name__ == '__main__':
     user1 = UserInterface("a", "a")
     r = user1.can_edit_desk(1)
+    r = user1.move_card(1, 1, 2, 2)
     print(r)
 
     # user2 = UserInterface("Gleb", "Kim")
