@@ -91,7 +91,6 @@ class UserInterface:
 
 
     def can_edit_desk(self,desk_id):
-        return True
         # можем ли мы редактировать доску
         # доску может редактировать владелец или пользователь из таблицы "права на редактирования"
         users = db_of_desks.can_edit_desk(desk_id, self.login)
@@ -231,9 +230,6 @@ class UserInterface:
 
 if __name__ == '__main__':
     user1 = UserInterface("a", "a")
-    r = user1.can_edit_desk(1)
-    r = user1.move_card(1, 1, 2, 2)
-    print(r)
 
     # user2 = UserInterface("Gleb", "Kim")
     # # user1.create_desk("misha desk3", 0)
